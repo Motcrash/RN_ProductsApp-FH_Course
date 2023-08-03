@@ -1,5 +1,5 @@
-import React from 'react'
-import { View, Text, KeyboardAvoidingView, TextInput, TouchableOpacity, Keyboard } from 'react-native';
+import React, { useEffect, } from 'react'
+import { View, Text, KeyboardAvoidingView, TextInput, TouchableOpacity, Keyboard, Alert } from 'react-native';
 
 import Icon from 'react-native-vector-icons/Ionicons'
 
@@ -7,19 +7,36 @@ import { loginStyles } from '../theme/loginTheme';
 import { WhiteLogo } from '../components/WhiteLogo';
 import { useForm } from '../hooks/useForm';
 import { StackScreenProps } from '@react-navigation/stack';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
 
 interface Props extends StackScreenProps <any, any> {}
 
 export const RegisterScreen = ({ navigation }: Props) => {
 
-    const { email, password, onChange} = useForm({
+    const { signUp, errorMessage, removeError} = useContext( AuthContext )
+
+    useEffect(() => {
+        if( errorMessage.length === 0 ) return
+  
+        Alert.alert('Incorrect login', errorMessage, [{ text: 'Ok', onPress: removeError}]);
+      }, [ errorMessage ])
+
+    const { name, email, password, onChange} = useForm({
         email: '',
         password: '',
         name: ''
     });
 
     const onRegister = () => {
+        console.log({email, password, name});
+        
         Keyboard.dismiss();
+        signUp({
+            nombre: name,
+            correo: email, 
+            password 
+        });
     }
 
    return (
@@ -43,8 +60,8 @@ export const RegisterScreen = ({ navigation }: Props) => {
                     style={ loginStyles.inputField }
                     selectionColor='white'
 
-                    onChangeText={( value ) => onChange(value, 'email')}
-                    value={ email }
+                    onChangeText={( value ) => onChange(value, 'name')}
+                    value={ name }
 
                     autoCapitalize='words'
                     autoCorrect={ false }
@@ -82,7 +99,7 @@ export const RegisterScreen = ({ navigation }: Props) => {
                     <TouchableOpacity
                         activeOpacity={ 0.9 }
                         style={ loginStyles.logButton }
-                        onPress={ ( ) => onRegister() }
+                        onPress={ onRegister }
                     >
                         <Text style={ loginStyles.logButtonText }>
                             Create account
